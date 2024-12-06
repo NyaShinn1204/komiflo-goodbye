@@ -32,8 +32,16 @@ class komiflo_downloader:
         comic_json = session.get(f"https://api.komiflo.com/content/id/{content_id}")
         img_list = []
         title = comic_json.json()["content"]["data"]["title"]
-        for img in comic_json.json()["content"]["imgs"].values():
+        key_data = comic_json()["content"]["key_data"]
+        Key_hash = comic_json()["content"]["key_hash"]
+        img_data = comic_json.json()["content"]["imgs"].values()
+        img_data = sorted(img_data, key=lambda x: x['id'])
+        for img in img_data:
             img_list.append("https://cdn.komiflo.com/resized/396_desktop_medium_2x/" + img["filename"])
+            
+            file_name_ii = img["filename"]
+            file_name_ii = re.sub(r'\.(jpg|png)$', '', file_name_ii)
+            print("https://cdn.komiflo.com/scrambled/"+file_name_ii)
         
         base_dir = "komiflo"
         download_dir = os.path.join(default_directory, base_dir, content_id)
@@ -50,7 +58,7 @@ class komiflo_downloader:
                     response = session.get(url)
                     response.raise_for_status()  # Raise an exception for bad status codes
                     # Save the image with a sequential file name like image_1.jpg, image_2.jpg, etc.
-                    filename = os.path.join(download_dir, f"image_{index+1}{os.path.splitext(url)[-1]}")
+                    filename = os.path.join(download_dir, f"image_{index + 1}{os.path.splitext(url)[-1]}")
                     with open(filename, 'wb') as file:
                         file.write(response.content)
                     return url, True
@@ -72,7 +80,7 @@ class komiflo_downloader:
         
 session = requests.Session()
 downloader = komiflo_downloader(session)
-downloader.login("email", "password")
+downloader.login("apexawsapex@outlook.jp", "msxqGtd2WYzCC4V")
 
 url_list = [
     "https://komiflo.com/#!/comics/25580/read/page/1"
