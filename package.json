@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "convert-js2py": "^1.1.9"
+  }
+}

@@ -1,4 +1,4 @@
-import base64, json, math, random
+import base64, json, math, random, time, re
 
 key_data = "InpyTl8cdwFRB35BaWBEcFABYwlQdwhaUEsHRFRzBQwzFE5LW0stQ0EHAkJQTgccBlRbSVldQkhOQ0FHVQBAW0EtRhJZQEhSaFZbX0sGRVIDQF4NDQFRT1kPXEQMVU5HAQBXbRoXU1NHCmJaU1dVCw8GH1kFDVdVDgNNCgVXVlMFBzlNQQZRQQhoCQZSBFADUg1PBwkEAQVYXANKBQYCV2huclQ4a2QCUBB8LGtoUXFTBm4CTnYJT1FLBEVWbQwNVwheTUFEK15TAAdQUywGAANRWkxfUlZIUkZERl0DQEdJQF4FUENbWm5LTFZGFEw6D1xaDgwJUFRWB0VDCl5GWg4GVggEAFI/SRIIVEZYPQIHBwtZAAxWSAYFUAoKW1ZVGAFVUFsOVloFbhQUUAVADToNWgcAAwYMTVwIVwwOAlZ1YXteVXVyBj4eZEZielIaUwNuBlFxC0ZNSAVJVXUODl8UXUpBR0RLQwJuXktGDhINP1xKX1JLQVRAXUBWBkFZTUZTHFlCXVEAVV5eLhpUUxRWNAEGDFBPWg5cTApYR0QOAE8JBQBQW1MAZE5GUFYRDG0CUwYIXFEABE0DAFZTVQwGVU1SBVdTBQQLBTweQAVQFlltCAUEDFlVBlIYBwNSYW9xWlBrdwFQCnFFaW81bUABZBJYHAhGU0kNQlV3EQxeClxCQENPXkABAUJeQgUBakhPSltJQCJTQ0VGUQNKXlRBWwRfRVNaBUtfVkcBQFEDWDIUFwtVWlVsQUQLVERDBA5PAQcHW1BVCAxOVVNUCgcHC1hvFEZWAhZbaQNTVFUDBlRWTwZSVAUECQBRHlMGVgNVAQ4BahhDVwdEDm0AUGtrc1hdf2oCUgB1RWhoX21TAmQDUHQKQzxVF0NUYwdmXwlYQk1BT0ddAAJGUUQCAANIXElcU05AU0AsXUYDQElCK1sCXEZYXQVRQlZBAkBTDlRWFAQLVU5cBUdGZEFURA4UWWsHBVZTVgYBU0hTVgcHBQFVBBRVVAMFUwoEUD5OFgNGWzgGU1sEBAEPUR5TB1kCWwAAABsFUV0HUAMBBjx1enZOXxxxCloKc05pdF94WwpmBVZrDk9YTgxBURwRH1saViFIQUFBRwQBQ0VGBwcEUVRMWkdLSVVBRkJRASVHWkZICjNBWl8CVlxRSxpHUQFdXg0MDE1JXwBBRw1URysbFFQSDG5TVFYBCVFcVkoCAAUCUQsPUUgGAlIDA1RSV2kcRllBDThSAQsKBFgCVxtQB1sECwQFAk1UAl4GBQZSbQVuTlxlfGhSA35BbW9ed04CZwhUcApEUFUEQFt3CwRdDzEH"
 key_hash = "n8lzyqvrq13riw707dmxhkzybrqqd1xkxpj0hpjh3gngs6va6lo859axo7pu9mvv"
@@ -323,22 +323,148 @@ def D(e, t, n):
         "crop": o,
         "area": a * n
     }
-
-
-def d(e, t):
-    n = random.Random(t)  # t をシードとして使う
-    i = len(e)
-    s = e[:]
     
-    while i:
-        a = int(n.random() * i)
-        i -= 1
-        s[a], s[i] = s[i], s[a]
-    
-    return s
+def random_function():
+    import random
 
-def u(e):
-    return list(range(e))
+    r = 48
+    a = 1
+    o = r
+    s = [0] * r
+    c = 0
+    l = lambda x: random.random() if x is None else x
+
+    for t in range(r):
+        s[t] = l(None)
+
+    def u():
+        nonlocal o, a
+        o += 1
+        if o >= r:
+            o = 0
+        e = 1768863 * s[o] + 2.3283064365386963e-10 * a
+        s[o] = e - (a := int(e))
+        return s[o]
+
+    def d(e):
+        return int(e * (u() + 11102230246251565e-32 * (int(2097152 * u()) | 0)))
+
+    def d_string(e):
+        return ''.join(chr(33 + d(94)) for _ in range(e))
+
+    def p(*args):
+        nonlocal s
+        for t in range(len(args)):
+            for n in range(r):
+                s[n] -= l(args[t])
+                if s[n] < 0:
+                    s[n] += 1
+
+    def clean_string(e):
+        e = e.strip().replace('\n ', '\n')
+        return ''.join(c for c in e if not (0 <= ord(c) <= 31))
+
+    def hash_string(e):
+        nonlocal c
+        e = clean_string(e)
+        l(e)
+        for t in range(len(e)):
+            c = ord(e[t])
+            for n in range(r):
+                s[n] -= l(c)
+                if s[n] < 0:
+                    s[n] += 1
+
+    def seed(e=None):
+        if e is None:
+            e = random.random()
+        if not isinstance(e, str):
+            e = str(e) or ""
+        init_state()
+        hash_string(e)
+
+    def add_entropy(*args):
+        nonlocal c
+        e = ''.join(str(arg) for arg in args)
+        p(c + int(random.random() * 1000000) + e)
+
+    def init_state():
+        nonlocal a, o
+        l()
+        for t in range(r):
+            s[t] = l(" ")
+        a = 1
+        o = r
+
+    def done():
+        nonlocal l
+        l = None
+
+    def range_func(e):
+        return d(e)
+
+    def random_func():
+        return d(float('inf') - 1) / float('inf')
+
+    def float_between(e, t):
+        return random_func() * (t - e) + e
+
+    def int_between(e, t):
+        return int(random_func() * (t - e + 1)) + e
+
+    d.clean_string = clean_string
+    d.hash_string = hash_string
+    d.seed = seed
+    d.add_entropy = add_entropy
+    d.init_state = init_state
+    d.done = done
+    d.range = range_func
+    d.random = random_func
+    d.float_between = float_between
+    d.int_between = int_between
+
+    return d
+
+    
+class y_fun:
+    def g(e, t):
+        from random import random as r
+        n = random_function()(t)
+        i = len(e)
+        a = 0
+        o = 0
+        s = e[:]
+        while i:
+            o = s[a := int(r() * i)]
+            s[a] = s[i - 1]
+            s[i - 1] = o
+            i -= 1
+        return s
+    
+    def u(e):
+        return list(range(e))
+
+def map_function(e, t, o, M, a, i, s):
+    n = e % o
+    r = (e - n) / o
+    c = t % o
+    l = (t - c) / o
+    u = (l == s - 1) if i else (c == o - 1)  # 条件に応じて u を判定
+    c *= M; # c に M を掛ける
+    l *= M; # l に M を掛ける
+    
+    if (u):
+        # u が true の場合の調整
+        c -= 0 if i else a
+        l -= a if i else 0
+    
+    # 結果をオブジェクトとして返す
+    temp_json= {}
+    temp_json["sx"] = n * M
+    temp_json["sy"] = r * M
+    temp_json["dx"] = c
+    temp_json["dy"] = l
+    return temp_json
 
 # メイン処理
 for key in k:
@@ -364,13 +490,193 @@ for key in k:
 
 def generate_fucking_idiot_shit(seed):
     # 実行例
-    result = d(u(11*15), seed)
+    o = 11
+    s = 15
+    result = y_fun.g(y_fun.u(o * s), seed)
     return result  # ランダムに並べ替えられた結果が出力される
     
 
 # 結果の確認
 #print(n)
 print("0 seed: "+str(n["0"]["seed"]))
-print(generate_fucking_idiot_shit(n["0"]["seed"]))
+result_seed = generate_fucking_idiot_shit(n["0"]["seed"])
+#print(result_seed)
+#e = 画像の場所
+
+result_seed = [
+  87,
+  141,
+  148,
+  3,
+  134,
+  140,
+  105,
+  39,
+  122,
+  33,
+  92,
+  47,
+  151,
+  38,
+  28,
+  55,
+  15,
+  2,
+  49,
+  118,
+  34,
+  31,
+  14,
+  104,
+  153,
+  77,
+  128,
+  125,
+  99,
+  9,
+  29,
+  58,
+  10,
+  32,
+  101,
+  11,
+  35,
+  129,
+  12,
+  37,
+  138,
+  13,
+  163,
+  8,
+  36,
+  4,
+  16,
+  111,
+  51,
+  17,
+  53,
+  89,
+  18,
+  102,
+  5,
+  19,
+  59,
+  95,
+  133,
+  157,
+  121,
+  113,
+  65,
+  6,
+  130,
+  1,
+  7,
+  75,
+  27,
+  20,
+  131,
+  107,
+  21,
+  137,
+  71,
+  120,
+  48,
+  115,
+  22,
+  50,
+  117,
+  23,
+  52,
+  150,
+  24,
+  54,
+  126,
+  25,
+  56,
+  85,
+  26,
+  57,
+  30,
+  123,
+  60,
+  94,
+  83,
+  62,
+  160,
+  132,
+  124,
+  100,
+  135,
+  127,
+  142,
+  91,
+  68,
+  145,
+  93,
+  136,
+  109,
+  96,
+  139,
+  154,
+  98,
+  73,
+  97,
+  144,
+  61,
+  40,
+  147,
+  63,
+  41,
+  80,
+  64,
+  42,
+  156,
+  66,
+  43,
+  159,
+  67,
+  44,
+  162,
+  69,
+  45,
+  88,
+  70,
+  46,
+  90,
+  72,
+  143,
+  74,
+  103,
+  146,
+  76,
+  106,
+  149,
+  78,
+  108,
+  152,
+  79,
+  110,
+  155,
+  81,
+  112,
+  158,
+  82,
+  114,
+  161,
+  84,
+  116,
+  164,
+  86,
+  119,
+  0
+]
+
+result_seed_fuck = [
+    map_function(e=0, t=t, o=11, M=128, a=49, i=False, s=15) 
+    for t in result_seed
+]
+print(result_seed_fuck)
+
+#result_seed_fuck = map_function(e=0, t=result_seed, o=11, M=128, a=49, i=False, s=15)
 #for i in json.loads(n):
 #    print(i)
